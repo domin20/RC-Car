@@ -1,12 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define MAX_WIRELESS_FRAME_DATA_SIZE 20
-#define CRC_SIZE 2
-#define MIN_FRAME_SIZE 4
-#define FRAME_SIZE_WITHOUT_DATA 4
-
-enum WirelessFrameState { ADDRESS = 0, COMMAND = 1, DATA_WITH_CRC = 2 };
+#include "Types.h"
 
 #pragma pack(push, 1)
 

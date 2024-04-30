@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Types.h"
 #include "Structures.h"
 #include "Types.h"
 

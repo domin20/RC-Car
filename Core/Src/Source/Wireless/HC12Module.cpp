@@ -10,7 +10,24 @@ extern volatile uint8_t byte;
 
 void HC12Module::init(Function<uint64_t()> timeBase) { this->timeBase = timeBase; }
 
-void HC12Module::sendFrame(const WirelessFrame& frame) {}
+void HC12Module::sendFrame(const WirelessFrame& frame) {
+  const uint8_t* framePointer = reinterpret_cast<const uint8_t*>(&frame);
+  static uint8_t frameBuffer[MAX_DATA_SIZE];
+  uint16_t crc16 = 0;
+
+  for (uint16_t i = 0; i < frame.dataSize + 2; i++) {
+    frameBuffer[i] = framePointer[i];
+  }
+
+  crc16 = calculateCRC16(frameBuffer, frame.dataSize + 2);
+
+  frameBuffer[frame.dataSize + 2] = crc16 & 0xFF;
+  frameBuffer[frame.dataSize + 3] = crc16 >> 8;
+
+  for (uint8_t i = 0; i < frame.dataSize + FRAME_SIZE_WITHOUT_DATA; i++) {
+    // this->stream->print((char)frame[i]);
+  }
+}
 
 const WirelessFrame& HC12Module::getReceivedFrame() {}
 
