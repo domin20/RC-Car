@@ -10,11 +10,12 @@ struct WirelessFrame {
   uint8_t command;
   uint8_t dataSize;
   uint8_t data[MAX_WIRELESS_FRAME_DATA_SIZE];
+  uint16_t crc16;
 };
 
 struct ReceiverContext {
-  uint8_t rxFrameIndex;
-  volatile uint8_t rxFrame[255];
+  uint8_t rxByte;
+  volatile uint8_t rxFrame[MAX_FRAME_SIZE];
   volatile uint16_t rxFrameSize;
   bool isRxCompleted;
 };
