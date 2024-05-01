@@ -50,16 +50,25 @@ void HC12Module::update() {
 void HC12Module::setTxCpltFlag() { this->isTxCplt = true; }
 
 void HC12Module::loadDataToFrameStruct() {
-  uint8_t frameIdx = 0;
-  this->receivedFrame.master = this->receiverContext.rxFrame[frameIdx++];
-  this->receivedFrame.command = this->receiverContext.rxFrame[frameIdx++];
-  this->receivedFrame.dataSize = this->receiverContext.rxFrame[frameIdx++];
+  uint16_t calculatedCRC16 = this->calculateCRC16((uint8_t*)this->receiverContext.rxFrame,
+                                                  this->receiverContext.rxFrameSize - CRC_SIZE);
+  uint16_t receivedCrc16 = 0;
+  memcpy(&receivedCrc16,
+         (uint8_t*)&this->receiverContext.rxFrame[this->receiverContext.rxFrameSize - CRC_SIZE],
+         CRC_SIZE);
 
-  memcpy(this->receivedFrame.data, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
-         this->receivedFrame.dataSize);
-  frameIdx += this->receivedFrame.dataSize;
-  memcpy(&this->receivedFrame.crc16, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
-         sizeof(this->receivedFrame.crc16));
+  if (calculatedCRC16 == receivedCrc16) {
+    this->receiverContext.isRxCompleted = true;
+    uint8_t frameIdx = 0;
+
+    this->receivedFrame.master = this->receiverContext.rxFrame[frameIdx++];
+    this->receivedFrame.command = this->receiverContext.rxFrame[frameIdx++];
+    this->receivedFrame.dataSize = this->receiverContext.rxFrame[frameIdx++];
+
+    memcpy(this->receivedFrame.data, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
+           this->receivedFrame.dataSize);
+    this->receivedFrame.crc16 = receivedCrc16;
+  }
 }
 
 void HC12Module::onReceivedData(void) {
@@ -78,7 +87,6 @@ void HC12Module::onReceivedData(void) {
 void HC12Module::processFrame() {
   if (this->receiverContext.rxFrameSize >= MIN_FRAME_SIZE) {
     this->loadDataToFrameStruct();
-    this->receiverContext.isRxCompleted = true;
   }
   this->receiverContext.rxFrameSize = 0;
   this->isFrameReceiving = false;

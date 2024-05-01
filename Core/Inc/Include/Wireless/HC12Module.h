@@ -14,12 +14,11 @@ class HC12Module {
   bool isFrameAvailable();
 
   void update();
+  void onReceivedData(void);
 
   void setTxCpltFlag();
 
  private:
-  void onReceivedData(void);
-
   void processFrame();
   void loadDataToFrameStruct();
 
