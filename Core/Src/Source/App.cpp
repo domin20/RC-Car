@@ -7,10 +7,17 @@
 
 uint64_t App::appTimeUs = 0;
 uint64_t App::appTimeMs = 0;
+
+Motor App::dcMotor;
 HC12Module App::radioModule;
 
+HBridgeContext motorContext;
+GPIOPortPin enableForwardDirectionPin = {FORWARD_ENABLE_GPIO_Port, FORWARD_ENABLE_Pin};
+GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABLE_Pin};
+
 void App::setup() {
-  HAL_TIM_Base_Start_IT(&htim2);
+  App::setTimers();
+  App::setMotorContext();
   radioModule.init(&huart1, App::getTimeBaseUs);
 }
 
@@ -19,6 +26,19 @@ void App::mainLoop() {}
 void App::updateTimeBaseUs() {
   appTimeUs++;
   if (appTimeUs % 1000 == 0) appTimeMs++;
+}
+
+void App::setTimers() { HAL_TIM_Base_Start_IT(&htim2); }
+
+void App::setMotorContext() {
+  motorContext.goForwardPin = enableForwardDirectionPin;
+  motorContext.goReversePin = enableReverseDirectionPin;
+  motorContext.setMotorPowerUsingPwmValue = App::setMotorPowerUsingPwm;
+  dcMotor.init(&motorContext);
+}
+
+void App::setMotorPowerUsingPwm(uint8_t percentageValue) {
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, percentageValue);
 }
 
 uint64_t App::getTimeBaseUs() { return appTimeUs; }

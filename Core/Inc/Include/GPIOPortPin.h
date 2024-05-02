@@ -8,7 +8,7 @@ struct GPIOPortPin {
   uint16_t pin;
 
   inline void set() { HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET); }
-  inline void clear() { HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); }
+  inline void reset() { HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); }
   inline void toggle() { HAL_GPIO_TogglePin(port, pin); }
   inline GPIO_PinState read() { return HAL_GPIO_ReadPin(port, pin); }
 };

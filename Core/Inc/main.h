@@ -57,6 +57,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define MAIN_SUPPLY_VOLTAGE_Pin GPIO_PIN_3
+#define MAIN_SUPPLY_VOLTAGE_GPIO_Port GPIOA
+#define DC_ENGINE_VOLTAGE_Pin GPIO_PIN_4
+#define DC_ENGINE_VOLTAGE_GPIO_Port GPIOA
+#define FORWARD_ENABLE_Pin GPIO_PIN_0
+#define FORWARD_ENABLE_GPIO_Port GPIOB
+#define REVERSE_ENABLE_Pin GPIO_PIN_1
+#define REVERSE_ENABLE_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -1,19 +1,32 @@
 #pragma once
+
 #include "GPIOPortPin.h"
 #include "Types.h"
 
 struct HBridgeContext {
-  GPIOPortPin rightEnabled;
-  GPIOPortPin leftEnabled;
+  GPIOPortPin goForwardPin;
+  GPIOPortPin goReversePin;
 
-  Function<void(uint8_t)> setForwardMotorPower;
-  Function<void(uint8_t)> setReverseMotorPower;
+  void enableForward() {
+    goReversePin.reset();
+    goForwardPin.set();
+  }
+
+  void enableReverse() {
+    goForwardPin.reset();
+    goReversePin.set();
+  }
+
+  Function<void(uint8_t percentageValue)> setMotorPowerUsingPwmValue = nullptr;
 };
 
 class Motor {
  public:
-  void init(HBridgeContext& context);
+  void init(HBridgeContext* context);
+
+  void setForwardMotorSpeed(uint8_t percentageValue);
+  void setReverseMotorSpeed(uint8_t percentageValue);
 
  private:
-  HBridgeContext& context;
+  HBridgeContext* context;
 };
