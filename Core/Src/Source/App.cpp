@@ -15,9 +15,13 @@ HBridgeContext motorContext;
 GPIOPortPin enableForwardDirectionPin = {FORWARD_ENABLE_GPIO_Port, FORWARD_ENABLE_Pin};
 GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABLE_Pin};
 
+GPIOPortPin serviceLedPin = {SERVICE_LED_GPIO_Port, SERVICE_LED_Pin};
+
 void App::setup() {
-  App::setTimers();
-  App::setMotorContext();
+  App::initTimers();
+  App::initMotorContext();
+  App::initLedInstances();
+
   radioModule.init(&huart1, App::getTimeBaseUs);
 }
 
@@ -28,14 +32,16 @@ void App::updateTimeBaseUs() {
   if (appTimeUs % 1000 == 0) appTimeMs++;
 }
 
-void App::setTimers() { HAL_TIM_Base_Start_IT(&htim2); }
+void App::initTimers() { HAL_TIM_Base_Start_IT(&htim2); }
 
-void App::setMotorContext() {
+void App::initMotorContext() {
   motorContext.goForwardPin = enableForwardDirectionPin;
   motorContext.goReversePin = enableReverseDirectionPin;
   motorContext.setMotorPowerUsingPwmValue = App::setMotorPowerUsingPwm;
   dcMotor.init(&motorContext);
 }
+
+void App::initLedInstances() { serviceLed.setPin(&serviceLedPin); }
 
 void App::setMotorPowerUsingPwm(uint8_t percentageValue) {
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, percentageValue);

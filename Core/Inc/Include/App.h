@@ -1,16 +1,17 @@
 #pragma once
 
+#include "LED/Led.h"
 #include "Motor.h"
 #include "Wireless/HC12Module.h"
-
 class App {
  public:
   static void setup();
   static void mainLoop();
 
   // setting methods
-  static void setTimers();
-  static void setMotorContext();
+  static void initTimers();
+  static void initMotorContext();
+  static void initLedInstances();
 
   static void setMotorPowerUsingPwm(uint8_t percentageValue);
 
@@ -26,4 +27,5 @@ class App {
 
   static Motor dcMotor;
   static HC12Module radioModule;
+  static Led serviceLed;
 };

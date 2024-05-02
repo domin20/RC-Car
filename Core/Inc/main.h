@@ -65,6 +65,8 @@ void Error_Handler(void);
 #define FORWARD_ENABLE_GPIO_Port GPIOB
 #define REVERSE_ENABLE_Pin GPIO_PIN_1
 #define REVERSE_ENABLE_GPIO_Port GPIOB
+#define SERVICE_LED_Pin GPIO_PIN_9
+#define SERVICE_LED_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
