@@ -9,12 +9,12 @@ class Timer {
  public:
   inline void setUpFor(uint32_t interval) {
     this->interval = interval;
-    this->previousTime = AppEnvironment::getEnvironmentContext()->timeBase();
+    this->previousTime = AppEnvironment::getEnvironmentContext()->timeBaseMs();
     this->_isElapsed = false;
   }
 
   inline void update() {
-    uint32_t currentTime = AppEnvironment::getEnvironmentContext()->timeBase();
+    uint32_t currentTime = AppEnvironment::getEnvironmentContext()->timeBaseMs();
     if (this->_isElapsed == false && currentTime - this->previousTime > this->interval) {
       this->_isElapsed = true;
     }

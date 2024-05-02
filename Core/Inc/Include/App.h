@@ -8,7 +8,7 @@ class App {
   static void setup();
   static void mainLoop();
 
-  // setting methods
+  // init methods
   static void initTimers();
   static void initMotorContext();
   static void initLedInstances();

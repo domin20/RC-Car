@@ -17,7 +17,14 @@ GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABL
 
 GPIOPortPin serviceLedPin = {SERVICE_LED_GPIO_Port, SERVICE_LED_Pin};
 
+struct STM32F401EnvironmentContext : public AppEnvironmentContext {
+  uint64_t timeBaseMs() override { return App::getTimeBaseMs(); }
+  uint64_t timeBaseUs() override { return App::getTimeBaseUs(); }
+} appContext;
+
 void App::setup() {
+  AppEnvironment::setAppEnvironmentContext(&appContext);
+
   App::initTimers();
   App::initMotorContext();
   App::initLedInstances();
