@@ -2,7 +2,9 @@
 
 #include <main.h>
 
+#include "AdcManager.h"
 #include "Config/StaticConfig.h"
+#include "adc.h"
 #include "tim.h"
 
 uint64_t App::appTimeUs = 0;
@@ -28,6 +30,7 @@ void App::setup() {
   App::initTimers();
   App::initMotorContext();
   App::initLedInstances();
+  AdcManager::init(&hadc1);
 
   radioModule.init(&huart1, App::getTimeBaseUs);
 }
