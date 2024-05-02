@@ -3,12 +3,16 @@
 #include <main.h>
 
 #include "Config/StaticConfig.h"
+#include "tim.h"
 
 uint64_t App::appTimeUs = 0;
 uint64_t App::appTimeMs = 0;
 HC12Module App::radioModule;
 
-void App::setup() { radioModule.init(&huart1, App::getTimeBaseUs); }
+void App::setup() {
+  HAL_TIM_Base_Start_IT(&htim2);
+  radioModule.init(&huart1, App::getTimeBaseUs);
+}
 
 void App::mainLoop() {}
 
