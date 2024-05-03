@@ -4,13 +4,15 @@
 
 #include "AdcManager.h"
 #include "Config/StaticConfig.h"
+#include "MotorService.h"
+#include "ServoService.h"
 #include "adc.h"
 #include "tim.h"
 
 uint64_t App::appTimeUs = 0;
 uint64_t App::appTimeMs = 0;
 
-Motor App::dcMotor;
+Motor App::motor;
 HC12Module App::radioModule;
 
 HBridgeContext motorContext;
@@ -48,7 +50,7 @@ void App::initMotorContext() {
   motorContext.goForwardPin = enableForwardDirectionPin;
   motorContext.goReversePin = enableReverseDirectionPin;
   motorContext.setMotorPowerUsingPwmValue = App::setMotorPowerUsingPwm;
-  dcMotor.init(&motorContext);
+  motor.init(&motorContext);
 }
 
 void App::initLedInstances() { serviceLed.setPin(&serviceLedPin); }
@@ -61,4 +63,8 @@ uint64_t App::getTimeBaseUs() { return appTimeUs; }
 
 uint64_t App::getTimeBaseMs() { return appTimeMs; }
 
-HC12Module& App::getRadioModule() { return radioModule; }
+void App::performSteeringData(const SteeringData& steeringData) {
+  MotorService::setSpeed(steeringData.speedJoystickDeflection, steeringData.speedJoystickDirection);
+  ServoService::setPosition(steeringData.turnJoystickDeflection,
+                            steeringData.turnJoystickDirection);
+}

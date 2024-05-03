@@ -5,12 +5,10 @@
 
 class ServoService {
  public:
-  enum Direction { LEFT = 0, RIGHT = 1 };
-
   static void init(Function<void(uint16_t duty)> setPwmDutyCycle);
 
-  static void setPosition(uint8_t deflectionPercentage, Direction direction);
+  static void setPosition(uint8_t deflectionPercentage, uint8_t direction);
 
  private:
-  static Function<void(uint16_t duty)> setPwm;
+  static Function<void(uint16_t duty)> setPwmDutyCycle;
 };

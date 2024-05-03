@@ -1,5 +1,8 @@
 #pragma once
 
+enum DriveDirection { FORWARD = 0, REVERSE = 1 };
+enum TurnDirection { LEFT = 0, RIGHT = 1 };
+
 template <typename ReturnType, typename... Args>
 class Function;
 

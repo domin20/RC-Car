@@ -3,14 +3,16 @@
 #include "Config/StaticConfig.h"
 #include "Utils/Utils.h"
 
-void ServoService::init(Function<void(uint16_t duty)> setPwmDutyCycle) { setPwm = setPwmDutyCycle; }
+void ServoService::init(Function<void(uint16_t duty)> setPwmDutyCycle) {
+  ServoService::setPwmDutyCycle = setPwmDutyCycle;
+}
 
-void ServoService::setPosition(uint8_t deflectionPercentage, Direction direction) {
+void ServoService::setPosition(uint8_t deflectionPercentage, uint8_t direction) {
   uint16_t value = SERVO_ZERO_POSITION;
-  if (direction == Direction::LEFT) {
+  if (direction == TurnDirection::LEFT) {
     value = map(deflectionPercentage, 0, 100, SERVO_ZERO_POSITION, SERVO_MAX_POSITION);
-  } else if (direction == Direction::RIGHT) {
+  } else if (direction == TurnDirection::RIGHT) {
     value = map(deflectionPercentage, 0, 100, SERVO_ZERO_POSITION, SERVO_MIN_POSITION);
   }
-  setPwm(value);
+  setPwmDutyCycle(value);
 }

@@ -3,6 +3,9 @@
 
 #include "Types.h"
 
+enum SpeedDirection { FORWARD = 0, REVERSE = 1 };
+enum TurnDirection { LEFT = 0, RIGHT = 1 };
+
 #pragma pack(push, 1)
 
 struct WirelessFrame {
@@ -18,6 +21,13 @@ struct ReceiverContext {
   volatile uint8_t rxFrame[MAX_FRAME_SIZE];
   volatile uint16_t rxFrameSize;
   bool isRxCompleted;
+};
+
+struct SteeringData {
+  uint8_t speedJoystickDeflection;
+  uint8_t speedJoystickDirection;
+  uint8_t turnJoystickDeflection;
+  uint8_t turnJoystickDirection;
 };
 
 #pragma pack(pop)

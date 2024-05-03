@@ -3,6 +3,7 @@
 #include "LED/Led.h"
 #include "Motor.h"
 #include "Wireless/HC12Module.h"
+
 class App {
  public:
   static void setup();
@@ -19,13 +20,16 @@ class App {
   static uint64_t getTimeBaseUs();
   static uint64_t getTimeBaseMs();
 
-  static HC12Module& getRadioModule();
+  static HC12Module& getRadioModule() { return radioModule; }
+  static Motor& getMotorInstance() { return motor; }
+
+  static void performSteeringData(const SteeringData& steeringData);
 
  private:
   static uint64_t appTimeMs;
   static uint64_t appTimeUs;
 
-  static Motor dcMotor;
+  static Motor motor;
   static HC12Module radioModule;
   static Led serviceLed;
 };
