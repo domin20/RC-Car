@@ -4,6 +4,7 @@
 
 #include "AdcManager.h"
 #include "Config/StaticConfig.h"
+#include "LED/ServiceLed.h"
 #include "Service/MotorService.h"
 #include "Service/ServoService.h"
 #include "adc.h"
@@ -39,12 +40,12 @@ void App::setup() {
   wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
 
-  serviceLed.setBlink(200, 200, 1200);
+  ServiceLed::setBlink(200, 200, 1200);
 }
 
 void App::mainLoop() {
   wirelessController.onService();
-  serviceLed.update();
+  ServiceLed::update();
   MotorService::update();
 }
 
@@ -62,7 +63,7 @@ void App::initMotorContext() {
   motor.init(&motorContext);
 }
 
-void App::initLedInstances() { serviceLed.setPin(&serviceLedPin); }
+void App::initLedInstances() { ServiceLed::setPin(&serviceLedPin); }
 
 void App::setMotorPowerUsingPwm(uint8_t percentageValue) {
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, percentageValue);

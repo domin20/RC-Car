@@ -2,15 +2,6 @@
 
 #include "GPIOPortPin.h"
 
-bool Led::isLedOn = false;
-
-GPIOPortPin* Led::pin;
-Timer Led::timer;
-
-uint32_t Led::ledBlinkDurationMs = 0;
-uint16_t Led::ledOnMs = 0;
-uint16_t Led::ledOffMs = 0;
-
 void Led::setPin(GPIOPortPin* portPin) { pin = portPin; }
 
 void Led::update() {

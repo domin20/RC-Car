@@ -33,5 +33,4 @@ class App {
   static WirelessController wirelessController;
   static Motor motor;
   static HC12Module radioModule;
-  static Led serviceLed;
 };

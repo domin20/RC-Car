@@ -6,22 +6,22 @@
 
 class Led {
  public:
-  static void setPin(GPIOPortPin* portPin);
-  static void update();
+  void setPin(GPIOPortPin* portPin);
+  void update();
 
-  static void ledOn();
-  static void ledOff();
-  static void ledToggle();
-  static void setBlink(uint16_t timeOnMs, uint16_t timeOffMs, uint32_t durationMs = UINT32_MAX);
-  static void stopBlink();
+  void ledOn();
+  void ledOff();
+  void ledToggle();
+  void setBlink(uint16_t timeOnMs, uint16_t timeOffMs, uint32_t durationMs = UINT32_MAX);
+  void stopBlink();
 
  private:
-  static bool isLedOn;
+  bool isLedOn;
 
-  static GPIOPortPin* pin;
-  static Timer timer;
+  GPIOPortPin* pin;
+  Timer timer;
 
-  static uint32_t ledBlinkDurationMs;
-  static uint16_t ledOnMs;
-  static uint16_t ledOffMs;
+  uint32_t ledBlinkDurationMs;
+  uint16_t ledOnMs;
+  uint16_t ledOffMs;
 };
