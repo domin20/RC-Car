@@ -1,15 +1,16 @@
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <vector>
+
+#include "Types.h"
 
 // TODO(Dominik): Split it into separate files and create library
 
 class Integral {
  public:
-  explicit Integral(std::function<uint64_t()> timeBase = {});
-  explicit Integral(float timeConstant, std::function<uint64_t()> timeBase = {});
+  explicit Integral(Function<uint64_t()> timeBase = nullptr);
+  explicit Integral(float timeConstant, Function<uint64_t()> timeBase = nullptr);
 
   float update(float rawInputValue);
   void setTimeConstant(float timeConstant);
@@ -24,14 +25,14 @@ class Integral {
   bool isRising;
   uint64_t previousTimeStamp;
 
-  std::function<uint64_t()> timeBase;
+  Function<uint64_t()> timeBase;
   static constexpr float INVERSE_EULER = 0.368f;  // inverse euler
 };
 
 class Derivative {
  public:
-  explicit Derivative(std::function<uint64_t()> timeBase = {});
-  explicit Derivative(float timeConstant, std::function<uint64_t()> timeBase = {});
+  explicit Derivative(Function<uint64_t()> timeBase = nullptr);
+  explicit Derivative(float timeConstant, Function<uint64_t()> timeBase = nullptr);
 
   float update(float rawInputValue);
   void setTimeConstant(float timeConstant);
@@ -48,7 +49,7 @@ class Derivative {
 
   uint64_t previousTimeStamp;
 
-  std::function<uint64_t()> timeBase;
+  Function<uint64_t()> timeBase = nullptr;
 };
 
 class Inertia {
@@ -66,11 +67,11 @@ class Inertia {
 
 class PID {
  public:
-  explicit PID(std::function<uint64_t()> timeBase = {});
-  explicit PID(float propotionalGain, std::function<uint64_t()> timeBase = {});
-  PID(float propotionalGain, float integralGain, std::function<uint64_t()> timeBase = {});
+  explicit PID(Function<uint64_t()> timeBase = nullptr);
+  explicit PID(float propotionalGain, Function<uint64_t()> timeBase = nullptr);
+  PID(float propotionalGain, float integralGain, Function<uint64_t()> timeBase = nullptr);
   PID(float propotionalGain, float integralGain, float derivativeGain,
-      std::function<uint64_t()> timeBase = {});
+      Function<uint64_t()> timeBase = nullptr);
   ~PID(){};
 
   void setIntegralTimeConstant(float timeConstant);
@@ -88,7 +89,7 @@ class PID {
   float integralGain;
   float derivativeGain;
 
-  std::function<uint64_t()> timeBase;
+  Function<uint64_t()> timeBase = nullptr;
   Integral integral = Integral(timeBase);
   Derivative derivative = Derivative(timeBase);
 };

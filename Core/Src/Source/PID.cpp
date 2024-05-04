@@ -2,23 +2,23 @@
 
 #include <math.h>
 
-PID::PID(std::function<uint64_t()> timeBase)
+PID::PID(Function<uint64_t()> timeBase)
     : propotionalGain(1.0f), integralGain(1.0f), derivativeGain(1.0f), timeBase(timeBase) {}
 
-PID::PID(float propotionalGain, std::function<uint64_t()> timeBase)
+PID::PID(float propotionalGain, Function<uint64_t()> timeBase)
     : propotionalGain(propotionalGain),
       integralGain(1.0f),
       derivativeGain(1.0f),
       timeBase(timeBase) {}
 
-PID::PID(float propotionalGain, float integralGain, std::function<uint64_t()> timeBase)
+PID::PID(float propotionalGain, float integralGain, Function<uint64_t()> timeBase)
     : propotionalGain(propotionalGain),
       integralGain(integralGain),
       derivativeGain(1.0f),
       timeBase(timeBase) {}
 
 PID::PID(float propotionalGain, float integralGain, float derivativeGain,
-         std::function<uint64_t()> timeBase)
+         Function<uint64_t()> timeBase)
     : propotionalGain(propotionalGain),
       integralGain(integralGain),
       derivativeGain(derivativeGain),
@@ -65,7 +65,7 @@ float PID::integralUpdate(float inputValue) { return this->integral.update(input
 
 float PID::derivativeUpdate(float inputValue) { return this->derivative.update(inputValue); }
 
-Integral::Integral(std::function<uint64_t()> timeBase)
+Integral::Integral(Function<uint64_t()> timeBase)
     : timeConstant(1.0f),
       rawValueDifference(0.0f),
       processedValueDifference(0.0f),
@@ -75,7 +75,7 @@ Integral::Integral(std::function<uint64_t()> timeBase)
       previousTimeStamp(0),
       timeBase(timeBase) {}
 
-Integral::Integral(float timeConstant, std::function<uint64_t()> timeBase)
+Integral::Integral(float timeConstant, Function<uint64_t()> timeBase)
     : timeConstant(timeConstant),
       rawValueDifference(0.0f),
       processedValueDifference(0.0f),
@@ -110,7 +110,7 @@ float Integral::update(float rawInputValue) {
 
 void Integral::setTimeConstant(float timeConstant) { this->timeConstant = timeConstant; }
 
-Derivative::Derivative(std::function<uint64_t()> timeBase)
+Derivative::Derivative(Function<uint64_t()> timeBase)
     : timeConstant(1.0f),
       rawValueDifference(0.0f),
       processedValueDifference(0.0f),
@@ -119,7 +119,7 @@ Derivative::Derivative(std::function<uint64_t()> timeBase)
       previousTimeStamp(0),
       timeBase(timeBase) {}
 
-Derivative::Derivative(float timeConstant, std::function<uint64_t()> timeBase)
+Derivative::Derivative(float timeConstant, Function<uint64_t()> timeBase)
     : timeConstant(timeConstant),
       rawValueDifference(0.0f),
       processedValueDifference(0.0f),
