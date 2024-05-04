@@ -4,14 +4,16 @@
 
 #include "AdcManager.h"
 #include "Config/StaticConfig.h"
-#include "MotorService.h"
-#include "ServoService.h"
+#include "Service/MotorService.h"
+#include "Service/ServoService.h"
 #include "adc.h"
+#include "dma.h"
 #include "tim.h"
 
 uint64_t App::appTimeUs = 0;
 uint64_t App::appTimeMs = 0;
 
+WirelessController App::wirelessController;
 Motor App::motor;
 HC12Module App::radioModule;
 
@@ -32,12 +34,16 @@ void App::setup() {
   App::initTimers();
   App::initMotorContext();
   App::initLedInstances();
-  AdcManager::init(&hadc1);
+  AdcManager::init(&hadc1, &hdma_adc1);
 
+  wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
 }
 
-void App::mainLoop() {}
+void App::mainLoop() {
+  wirelessController.onService();
+  MotorService::update();
+}
 
 void App::updateTimeBaseUs() {
   appTimeUs++;

@@ -3,12 +3,12 @@
 
 class WirelessController {
  public:
-  void init(HC12Module& module);
+  void init(HC12Module* module);
   void onService();
 
   bool isFrameAvailable();
   const WirelessFrame& getReceivedFrame();
 
  private:
-  HC12Module& radioModule;
+  HC12Module* radioModule;
 };

@@ -1,7 +1,9 @@
-#include "ServoService.h"
+#include "Service/ServoService.h"
 
 #include "Config/StaticConfig.h"
 #include "Utils/Utils.h"
+
+Function<void(uint16_t duty)> ServoService::setPwmDutyCycle = nullptr;
 
 void ServoService::init(Function<void(uint16_t duty)> setPwmDutyCycle) {
   ServoService::setPwmDutyCycle = setPwmDutyCycle;

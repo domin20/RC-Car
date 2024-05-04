@@ -3,9 +3,6 @@
 
 #include "Types.h"
 
-enum SpeedDirection { FORWARD = 0, REVERSE = 1 };
-enum TurnDirection { LEFT = 0, RIGHT = 1 };
-
 #pragma pack(push, 1)
 
 struct WirelessFrame {

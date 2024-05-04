@@ -3,6 +3,7 @@
 #include "LED/Led.h"
 #include "Motor.h"
 #include "Wireless/HC12Module.h"
+#include "Wireless/WirelessController.h"
 
 class App {
  public:
@@ -29,6 +30,7 @@ class App {
   static uint64_t appTimeMs;
   static uint64_t appTimeUs;
 
+  static WirelessController wirelessController;
   static Motor motor;
   static HC12Module radioModule;
   static Led serviceLed;

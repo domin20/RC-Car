@@ -1,7 +1,12 @@
-#include "MotorService.h"
+#include "Service/MotorService.h"
 
 #include "App.h"
 #include "Config/StaticConfig.h"
+
+uint64_t MotorService::timestampLastDataUpdate = 0;
+uint8_t MotorService::powerPercentageLevel = 0;
+uint8_t MotorService::driveDirection = 0;
+Function<uint64_t()> MotorService::timeBase = nullptr;
 
 void MotorService::init(Function<uint64_t()> timeBase) { MotorService::timeBase = timeBase; }
 
