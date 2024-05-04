@@ -38,10 +38,13 @@ void App::setup() {
 
   wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
+
+  serviceLed.setBlink(200, 200, 1200);
 }
 
 void App::mainLoop() {
   wirelessController.onService();
+  serviceLed.update();
   MotorService::update();
 }
 
