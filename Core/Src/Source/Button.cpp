@@ -3,8 +3,8 @@
 #define IS_PRESSED 0
 #define IS_RELEASED 1
 
-Button::Button(Function<uint64_t()> timeBase)
-    : onClick(nullptr), timeBase(timeBase), state(State::IDLE) {
+Button::Button(etl::delegate<uint64_t()> timeBase)
+    : onClick(), timeBase(timeBase), state(State::IDLE) {
   this->buttonReadTimer.setUpFor(20);
 }
 

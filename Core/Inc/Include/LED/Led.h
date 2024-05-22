@@ -4,6 +4,8 @@
 #include "../Utils/Timer.h"
 #include "GPIOPortPin.h"
 
+class Timer;
+
 class Led {
  public:
   void setPin(GPIOPortPin* portPin);

@@ -20,7 +20,7 @@ WirelessController App::wirelessController;
 Motor App::motor;
 HC12Module App::radioModule;
 
-Button App::button(App::getTimeBaseMs);
+Button App::button([]() { return App::getTimeBaseMs(); });
 
 HBridgeContext motorContext;
 GPIOPortPin enableForwardDirectionPin = {FORWARD_ENABLE_GPIO_Port, FORWARD_ENABLE_Pin};
@@ -31,15 +31,22 @@ RgbPinSet rgbPinSet = {{LED_RGB_R_GPIO_Port, LED_RGB_R_Pin},
                        {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin}};
 GPIOPortPin serviceLedPin = {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin};
 
+struct STM32F401EnvironmentContext : public AppEnvironmentContext {
+  uint64_t timeBaseMs() override { return App::getTimeBaseMs(); }
+  uint64_t timeBaseUs() override { return App::getTimeBaseUs(); }
+} appContext;
+
 void App::setup() {
+  AppEnvironment::setAppEnvironmentContext(&appContext);
+
   App::initTimers();
   App::initMotorContext();
   App::initLedInstances();
   AdcManager::init(&hadc1, &hdma_adc1);
 
-  button.addOnClick(App::onButtonClick);
-  button.addOnHold(SERVO_TEST_HOLD_TIME, App::servoTest);
-  button.addOnHold(MOTOR_TEST_HOLD_TIME, App::motorTest);
+  button.addOnClick([]() { App::onButtonClick(); });
+  button.addOnHold(SERVO_TEST_HOLD_TIME, []() { App::servoTest(); });
+  button.addOnHold(MOTOR_TEST_HOLD_TIME, []() { App::motorTest(); });
 
   wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
@@ -104,7 +111,6 @@ void App::servoTest() {
   if (!testTimer.isElapsed()) {
     return;
   }
-  static uint8_t value = 0;
   static uint8_t step = 0;
 
   switch (step) {

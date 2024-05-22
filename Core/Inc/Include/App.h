@@ -1,3 +1,11 @@
+/*
+  App builded by Dominik Kusiak in 22.05.2024
+
+  App software will be developed in the future, I want to add new features for example lighting,
+  cruise control, distance sensors on front of vehicle, more capacity of battery pack and power
+  control using voltage level set with a digital potentiometer.
+*/
+
 #pragma once
 
 #include "Button.h"
@@ -30,10 +38,13 @@ class App {
   static void enableServoTest();
   static void enableMotorTest();
 
+  // tests
   static void servoTest();
   static void motorTest();
 
   static void updateTimeBaseUs();
+
+  // getters
   static uint64_t getTimeBaseUs();
   static uint64_t getTimeBaseMs();
 
