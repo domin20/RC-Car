@@ -3,12 +3,15 @@
 #define IS_PRESSED 0
 #define IS_RELEASED 1
 
-Button::Button(Function<uint32_t()> timeBase)
+Button::Button(Function<uint64_t()> timeBase)
     : onClick(nullptr), timeBase(timeBase), state(State::IDLE) {
   this->buttonReadTimer.setUpFor(20);
 }
 
 void Button::update() {
+  if (this->isBlocked) {
+    return;
+  }
   this->timer.update();
   this->buttonReadTimer.update();
   static uint32_t pressTimestamp = 0;

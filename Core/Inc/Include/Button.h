@@ -11,6 +11,8 @@ class Button {
   Button(Function<uint64_t()> timeBase);
 
   void update();
+  void block() { isBlocked = true; }
+  void unblock() { isBlocked = false; }
   inline void setPin(GPIOPortPin* pin) { this->pin = pin; }
   inline void addOnClick(Function<void()> onClick) { this->onClick = onClick; }
   inline void addOnHold(uint32_t holdTimeMs, Function<void()> onHold) {
@@ -27,6 +29,7 @@ class Button {
   };
 
  private:
+  bool isBlocked = false;
   GPIOPortPin* pin;
   Function<void()> onClick;
   etl::map<uint32_t, Function<void()>, MAX_ON_HOLD_FUNCTIONS> onHoldFunctions;

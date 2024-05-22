@@ -16,6 +16,20 @@ void LedRGB::update() {
   blue.update();
 }
 
+void LedRGB::selfTest() {
+  green.ledOff();
+  blue.ledOff();
+  red.ledOn();
+  HAL_Delay(500);
+  red.ledOff();
+  green.ledOn();
+  HAL_Delay(500);
+  green.ledOff();
+  blue.ledOn();
+  HAL_Delay(500);
+  blue.ledOff();
+}
+
 void LedRGB::ledOn(LedColor color) {
   if (color == LedColor::RED) red.ledOn();
   if (color == LedColor::GREEN) green.ledOn();

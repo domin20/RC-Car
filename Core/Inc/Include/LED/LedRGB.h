@@ -14,6 +14,8 @@ class LedRGB {
   static void setRgbPins(RgbPinSet* rgbPinSet);
   static void update();
 
+  static void selfTest();
+
   static void ledOn(LedColor color);
   static void ledOff(LedColor color);
   static void ledToggle(LedColor color);

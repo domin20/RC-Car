@@ -3,18 +3,18 @@
 #include <stdint.h>
 
 #include "../Types.h"
-#include "AppEnvironment.h"
+#include "App.h"
 
 class Timer {
  public:
   inline void setUpFor(uint32_t interval) {
     this->interval = interval;
-    this->previousTime = AppEnvironment::getEnvironmentContext()->timeBaseMs();
+    this->previousTime = App::getTimeBaseMs();
     this->_isElapsed = false;
   }
 
   inline void update() {
-    uint32_t currentTime = AppEnvironment::getEnvironmentContext()->timeBaseMs();
+    uint32_t currentTime = App::getTimeBaseMs();
     if (this->_isElapsed == false && currentTime - this->previousTime > this->interval) {
       this->_isElapsed = true;
     }
