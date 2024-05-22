@@ -4,7 +4,7 @@
 
 #include "AdcManager.h"
 #include "Config/StaticConfig.h"
-#include "LED/ServiceLed.h"
+#include "LED/LedRGB.h"
 #include "Service/MotorService.h"
 #include "Service/ServoService.h"
 #include "adc.h"
@@ -22,7 +22,10 @@ HBridgeContext motorContext;
 GPIOPortPin enableForwardDirectionPin = {FORWARD_ENABLE_GPIO_Port, FORWARD_ENABLE_Pin};
 GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABLE_Pin};
 
-GPIOPortPin serviceLedPin = {SERVICE_LED_GPIO_Port, SERVICE_LED_Pin};
+RgbPinSet rgbPinSet = {{LED_RGB_R_GPIO_Port, LED_RGB_R_Pin},
+                       {LED_RGB_G_GPIO_Port, LED_RGB_G_Pin},
+                       {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin}};
+GPIOPortPin serviceLedPin = {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin};
 
 struct STM32F401EnvironmentContext : public AppEnvironmentContext {
   uint64_t timeBaseMs() override { return App::getTimeBaseMs(); }
@@ -40,12 +43,12 @@ void App::setup() {
   wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
 
-  ServiceLed::setBlink(200, 200, 1200);
+  LedRGB::setBlink(LedColor::WHITE, 200, 200, 1200);
 }
 
 void App::mainLoop() {
   wirelessController.onService();
-  ServiceLed::update();
+  LedRGB::update();
   MotorService::update();
 }
 
@@ -63,7 +66,7 @@ void App::initMotorContext() {
   motor.init(&motorContext);
 }
 
-void App::initLedInstances() { ServiceLed::setPin(&serviceLedPin); }
+void App::initLedInstances() { LedRGB::setRgbPins(&rgbPinSet); }
 
 void App::setMotorPowerUsingPwm(uint8_t percentageValue) {
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, percentageValue);
