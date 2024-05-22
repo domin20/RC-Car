@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Button.h"
 #include "LED/Led.h"
 #include "Motor.h"
 #include "Wireless/HC12Module.h"
@@ -33,4 +34,6 @@ class App {
   static WirelessController wirelessController;
   static Motor motor;
   static HC12Module radioModule;
+
+  static Button button;
 };

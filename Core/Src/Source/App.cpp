@@ -18,6 +18,8 @@ WirelessController App::wirelessController;
 Motor App::motor;
 HC12Module App::radioModule;
 
+Button App::button(App::getTimeBaseMs);
+
 HBridgeContext motorContext;
 GPIOPortPin enableForwardDirectionPin = {FORWARD_ENABLE_GPIO_Port, FORWARD_ENABLE_Pin};
 GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABLE_Pin};
@@ -40,6 +42,10 @@ void App::setup() {
   App::initLedInstances();
   AdcManager::init(&hadc1, &hdma_adc1);
 
+  button.addOnClick(App::onButtonClick);
+  button.addOnHold(SERVO_TEST_HOLD_TIME, App::servoTest);
+  button.addOnHold(MOTOR_TEST_HOLD_TIME, App::motorTest);
+
   wirelessController.init(&radioModule);
   radioModule.init(&huart1, App::getTimeBaseUs);
 
@@ -48,6 +54,7 @@ void App::setup() {
 
 void App::mainLoop() {
   wirelessController.onService();
+  button.update();
   LedRGB::update();
   MotorService::update();
 }
