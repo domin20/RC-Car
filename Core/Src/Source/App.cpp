@@ -29,7 +29,7 @@ GPIOPortPin enableReverseDirectionPin = {REVERSE_ENABLE_GPIO_Port, REVERSE_ENABL
 RgbPinSet rgbPinSet = {{LED_RGB_R_GPIO_Port, LED_RGB_R_Pin},
                        {LED_RGB_G_GPIO_Port, LED_RGB_G_Pin},
                        {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin}};
-GPIOPortPin serviceLedPin = {LED_RGB_B_GPIO_Port, LED_RGB_B_Pin};
+GPIOPortPin buttonPin = {USER_BUTTON_GPIO_Port, USER_BUTTON_Pin};
 
 struct STM32F401EnvironmentContext : public AppEnvironmentContext {
   uint64_t timeBaseMs() override { return App::getTimeBaseMs(); }
@@ -44,6 +44,7 @@ void App::setup() {
   App::initLedInstances();
   AdcManager::init(&hadc1, &hdma_adc1);
 
+  button.setPin(&buttonPin);
   button.addOnClick([]() { App::onButtonClick(); });
   button.addOnHold(SERVO_TEST_HOLD_TIME, []() { App::servoTest(); });
   button.addOnHold(MOTOR_TEST_HOLD_TIME, []() { App::motorTest(); });
