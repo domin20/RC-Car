@@ -26,7 +26,7 @@ class AdcManager {
 
   static AdcBuffer getBuffer();
 
-  static void endOfConversionCallback(DMA_HandleTypeDef* hdma);
+  static void endOfConversionCallback();
 
   static float getMainSupplyVoltage();
   static float getDcMotorVoltage();

@@ -19,6 +19,7 @@ class LedRGB {
   static void ledOn(LedColor color);
   static void ledOff(LedColor color);
   static void ledToggle(LedColor color);
+  static void turnOffAllColors();
 
   static void setBlink(LedColor color, uint16_t timeOnMs, uint16_t timeOffMs,
                        uint32_t durationMs = UINT32_MAX);

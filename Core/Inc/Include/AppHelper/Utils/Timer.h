@@ -2,8 +2,7 @@
 
 #include <stdint.h>
 
-#include "../Types.h"
-#include "AppEnvironment.h"
+#include "AppHelper/Env/AppEnvironment.h"
 
 class Timer {
  public:

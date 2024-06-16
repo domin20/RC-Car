@@ -9,18 +9,14 @@ AdcBuffer AdcManager::adcBuffer = {};
 
 void AdcManager::init(ADC_HandleTypeDef* hadc, DMA_HandleTypeDef* hdma) {
   HAL_ADC_Start_DMA(hadc, (uint32_t*)&adcBuffer, ADC_CONVERSION_COUNT);
-  HAL_DMA_RegisterCallback(hdma, HAL_DMA_CallbackIDTypeDef::HAL_DMA_XFER_CPLT_CB_ID,
-                           endOfConversionCallback);
   AdcManager::hdma = hdma;
 }
 
 AdcBuffer AdcManager::getBuffer() { return adcBuffer; }
 
-void AdcManager::endOfConversionCallback(DMA_HandleTypeDef* hdma) {
-  if (hdma == AdcManager::hdma) {
-    calculateAdcChannelValues(&mainSupply, adcBuffer.mainSupplyVoltageRawValue);
-    calculateAdcChannelValues(&dcMotor, adcBuffer.dcMotorVoltageRawValue);
-  }
+void AdcManager::endOfConversionCallback() {
+  calculateAdcChannelValues(&mainSupply, adcBuffer.mainSupplyVoltageRawValue);
+  calculateAdcChannelValues(&dcMotor, adcBuffer.dcMotorVoltageRawValue);
 }
 
 float AdcManager::getMainSupplyVoltage() {

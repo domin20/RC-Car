@@ -3,38 +3,47 @@
 #include <main.h>
 #include <string.h>
 
-void HC12Module::init(UART_HandleTypeDef* huart, Function<uint64_t()> timeBaseUs) {
+void HC12Module::init(UART_HandleTypeDef* huart, GPIOPortPin* setPin,
+                      etl::delegate<uint64_t()> timeBaseUs) {
   this->huart = huart;
   this->timeBaseUs = timeBaseUs;
+  this->setPin = setPin;
+  this->enableNormalMode();
 
   HAL_UART_Receive_IT(huart, (uint8_t*)&receiverContext.rxByte, 1);
 }
 
-void HC12Module::sendFrame(const WirelessFrame& frame) {
+bool HC12Module::sendFrame(uint8_t* frame, uint8_t size) {
   static uint8_t frameBuffer[MAX_FRAME_SIZE];
-  uint8_t frameIdx = 0;
-  uint16_t crc16 = 0;
+  if (size > MAX_FRAME_SIZE) {
+    return false;
+  }
 
-  frameBuffer[frameIdx++] = frame.master;
-  frameBuffer[frameIdx++] = frame.command;
-  frameBuffer[frameIdx++] = frame.dataSize;
-  memcpy(&frameBuffer[frameIdx], frame.data, frame.dataSize);
-  frameIdx += frame.dataSize;
-
-  crc16 = calculateCRC16(frameBuffer, frame.dataSize + 2);
-  memcpy(&frameBuffer[frameIdx], &crc16, sizeof(crc16));
-  frameIdx += sizeof(crc16);
-
+  memcpy(frameBuffer, frame, size);
   this->isTxCplt = false;
-  HAL_UART_Transmit_IT(this->huart, frameBuffer, frameIdx);
+  HAL_UART_Transmit_IT(this->huart, frameBuffer, size);
+  return true;
 }
 
-const WirelessFrame& HC12Module::getReceivedFrame() {
+void HC12Module::sendRawData(void* data, size_t size) {
+  HAL_UART_Transmit_IT(this->huart, (uint8_t*)data, size);
+}
+
+const WirelessFrame& HC12Module::getReceivedFrame(uint8_t* frameLength) {
+  if (frameLength != nullptr) {
+    *frameLength = this->receivedFrameLength;
+  }
   this->receiverContext.isRxCompleted = false;
   return this->receivedFrame;
 }
 
 bool HC12Module::isFrameAvailable() { return this->receiverContext.isRxCompleted; }
+
+bool HC12Module::isAckAvailable() {
+  bool r = this->isAckReceived;
+  this->isAckReceived = false;
+  return r;
+}
 
 void HC12Module::update() {
   if (!this->timeBaseUs) {
@@ -50,25 +59,25 @@ void HC12Module::update() {
 void HC12Module::setTxCpltFlag() { this->isTxCplt = true; }
 
 void HC12Module::loadDataToFrameStruct() {
-  uint16_t calculatedCRC16 = this->calculateCRC16((uint8_t*)this->receiverContext.rxFrame,
-                                                  this->receiverContext.rxFrameSize - CRC_SIZE);
-  uint16_t receivedCrc16 = 0;
-  memcpy(&receivedCrc16,
-         (uint8_t*)&this->receiverContext.rxFrame[this->receiverContext.rxFrameSize - CRC_SIZE],
-         CRC_SIZE);
+  uint8_t frameIdx = 0;
 
-  if (calculatedCRC16 == receivedCrc16) {
-    this->receiverContext.isRxCompleted = true;
-    uint8_t frameIdx = 0;
+  this->receivedFrame.master = this->receiverContext.rxFrame[frameIdx++];
+  this->receivedFrame.command = this->receiverContext.rxFrame[frameIdx++];
+  this->receivedFrame.dataSize = this->receiverContext.rxFrame[frameIdx++];
 
-    this->receivedFrame.master = this->receiverContext.rxFrame[frameIdx++];
-    this->receivedFrame.command = this->receiverContext.rxFrame[frameIdx++];
-    this->receivedFrame.dataSize = this->receiverContext.rxFrame[frameIdx++];
+  memcpy(this->receivedFrame.data, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
+         this->receiverContext.rxFrameSize - MIN_FRAME_SIZE);
+  frameIdx += this->receiverContext.rxFrameSize - MIN_FRAME_SIZE;
 
-    memcpy(this->receivedFrame.data, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
-           this->receivedFrame.dataSize);
-    this->receivedFrame.crc16 = receivedCrc16;
-  }
+  memcpy(&this->receivedFrame.crc16, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
+         sizeof(this->receivedFrame.crc16));
+  frameIdx += sizeof(this->receivedFrame.crc16);
+
+  memcpy(&this->receivedFrame.key, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
+         sizeof(this->receivedFrame.key));
+
+  this->receivedFrameLength = this->receiverContext.rxFrameSize;
+  this->receiverContext.isRxCompleted = true;
 }
 
 void HC12Module::onReceivedData(void) {
@@ -78,11 +87,18 @@ void HC12Module::onReceivedData(void) {
   this->timeStampLastByte = this->timeBaseUs();
   this->isFrameReceiving = true;
 
-  this->receiverContext.rxFrame[this->receiverContext.rxFrameSize] = this->receiverContext.rxByte;
-  this->receiverContext.rxFrameSize++;
-
+  if (this->receiverContext.rxByte == this->ackByte && this->receiverContext.rxFrameSize == 0) {
+    this->isAckReceived = true;
+  } else {
+    this->receiverContext.rxFrame[this->receiverContext.rxFrameSize] = this->receiverContext.rxByte;
+    this->receiverContext.rxFrameSize++;
+  }
   HAL_UART_Receive_IT(this->huart, (uint8_t*)&receiverContext.rxByte, 1);
 }
+
+void HC12Module::enableNormalMode() { this->setPin->set(); }
+
+void HC12Module::enableCommandMode() { this->setPin->reset(); }
 
 void HC12Module::processFrame() {
   if (this->receiverContext.rxFrameSize >= MIN_FRAME_SIZE) {
@@ -90,23 +106,4 @@ void HC12Module::processFrame() {
   }
   this->receiverContext.rxFrameSize = 0;
   this->isFrameReceiving = false;
-}
-
-uint16_t HC12Module::calculateCRC16(uint8_t* data, uint8_t length) {
-  uint16_t crc = 0xFFFF;
-
-  for (int pos = 0; pos < length; pos++) {
-    crc ^= (uint16_t)data[pos];  // XOR byte into least sig. byte of crc
-
-    for (int i = 8; i != 0; i--) {  // Loop over each bit
-      if ((crc & 0x0001) != 0) {    // If the LSB is set
-        crc >>= 1;                  // Shift right and XOR 0xA001
-        crc ^= 0xA001;
-      } else {      // Else LSB is not set
-        crc >>= 1;  // Just shift right
-      }
-    }
-  }
-  // Note, this number has low and high bytes swapped, so use it accordingly (or swap bytes)
-  return crc;
 }
