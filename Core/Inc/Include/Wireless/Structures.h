@@ -15,7 +15,7 @@ struct WirelessFrame {
   uint64_t key;
 
   size_t ToBufferIfEncrypted(uint8_t* data, uint8_t frameLength) const {
-    if (frameLength < MIN_FRAME_SIZE + this->dataSize) {
+    if (frameLength < MIN_FRAME_SIZE + FRAME_KEY_SIZE) {
       return 0;
     }
     uint8_t idx = 0;
@@ -23,7 +23,7 @@ struct WirelessFrame {
     data[idx++] = command;
     data[idx++] = dataSize;
     memcpy(&data[idx], this->data, frameLength - MIN_FRAME_SIZE);
-    idx += frameLength - MIN_FRAME_SIZE;
+    idx += frameLength - MIN_FRAME_SIZE - FRAME_KEY_SIZE;
     memcpy(&data[idx], &this->crc16, sizeof(this->crc16));
     idx += sizeof(this->crc16);
     memcpy(&data[idx], &this->key, sizeof(this->key));
@@ -43,10 +43,6 @@ struct WirelessFrame {
     idx += this->dataSize;
     memcpy(&data[idx], &this->crc16, sizeof(this->crc16));
     idx += sizeof(this->crc16);
-    if (this->key != 0) {
-      memcpy(&data[idx], &this->key, sizeof(this->key));
-      idx += sizeof(this->key);
-    }
     return idx;
   }
 

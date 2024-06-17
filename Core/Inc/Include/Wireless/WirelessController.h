@@ -15,7 +15,7 @@ class WirelessController {
   void sendSynchronizeRTCResponse();
 
   bool isFrameAvailable();
-  bool checkFrameCRC16(const WirelessFrame& frame);
+  bool checkFrameCRC16(const WirelessFrame& frame, uint8_t frameLength, bool isEncrypted);
   const WirelessFrame& getReceivedFrame(uint8_t* frameLength = nullptr);
 
  private:

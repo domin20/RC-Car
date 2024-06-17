@@ -29,7 +29,7 @@ void Led::update() {
         this->ledBlinkDurationMs -= this->ledOnMs;
       }
     }
-  } else if (this->timer.isElapsed() && !this->ledBlinkDurationMs && this->isLedOn) {
+  } else if (this->timer.isElapsed() && !this->ledBlinkDurationMs) {
     this->ledOff();
     this->isBlinkEnabled = false;
   }

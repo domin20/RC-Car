@@ -104,7 +104,8 @@ void App::initTimers() {
 
 void App::initButtons() {
   button.setPin(&buttonPin);
-  button.addOnClick([]() { App::onButtonClick(); });
+  button.addOnClick([]() { App::switchSecurityLayerType(); });
+  button.addOnHold(2000, []() { LedRGB::selfTest(); });
   button.addOnHold(SERVO_TEST_HOLD_TIME, []() { App::enableServoTest(); });
   button.addOnHold(MOTOR_TEST_HOLD_TIME, []() { App::enableMotorTest(); });
 }
@@ -120,6 +121,8 @@ void App::initLedInstances() { LedRGB::setRgbPins(&rgbPinSet); }
 
 void App::initWireless() {
   wirelessController.init(&radioModule);
+  wirelessController.setSecurityLayer(
+      SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::NONE));
   radioModule.init(&huart1, &setPin, []() { return App::getTimeBaseUs10(); });
 }
 
@@ -177,7 +180,7 @@ time_t App::rtcToUnixTime(RTC_TimeTypeDef* rtcTime, RTC_DateTypeDef* rtcDate) {
   return mktime(&timeinfo);
 }
 
-void App::onButtonClick() { LedRGB::selfTest(); }
+void App::onButtonClick() {}
 
 void App::enableServoTest() {
   if (!testFlags.isMotorTestEnabled && !testFlags.isServoTestEnabled) {
@@ -192,6 +195,32 @@ void App::enableMotorTest() {
     testFlags.isMotorTestEnabled = true;
     TEST_LED_ON;
     button.block();
+  }
+}
+
+void App::switchSecurityLayerType() {
+  switch (securityLayerType) {
+    case SecurityLayerType::NONE:
+      securityLayerType = SecurityLayerType::XOR_KEY_ROTATION;
+      App::getWirelessController().setSecurityLayer(
+          SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::XOR_KEY_ROTATION));
+      radioModule.enableEncryptionProcessing();
+      LedRGB::ledOn(LedColor::GREEN);
+      break;
+    case SecurityLayerType::XOR_KEY_ROTATION:
+      securityLayerType = SecurityLayerType::TIMESTAMP;
+      App::getWirelessController().setSecurityLayer(
+          SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::TIMESTAMP));
+      radioModule.enableEncryptionProcessing();
+      LedRGB::ledOn(LedColor::BLUE);
+      break;
+    case SecurityLayerType::TIMESTAMP:
+      securityLayerType = SecurityLayerType::NONE;
+      App::getWirelessController().setSecurityLayer(
+          SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::NONE));
+      radioModule.disableEncryptionProcessing();
+      LedRGB::turnOffAllColors();
+      break;
   }
 }
 

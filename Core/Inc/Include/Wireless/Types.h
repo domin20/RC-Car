@@ -5,8 +5,8 @@
 #define MASTER_NUMBER 69
 
 constexpr uint8_t CRC_SIZE = 2;
-constexpr uint8_t MIN_FRAME_SIZE = 13;
-constexpr uint8_t FRAME_SIZE_WITHOUT_DATA_AND_CRC16 = 11;
+constexpr uint8_t MIN_FRAME_SIZE = 5;
+constexpr uint8_t FRAME_KEY_SIZE = 8;
 
 constexpr uint8_t MAX_WIRELESS_FRAME_DATA_SIZE = 30;
 constexpr uint8_t MAX_FRAME_SIZE = 255;

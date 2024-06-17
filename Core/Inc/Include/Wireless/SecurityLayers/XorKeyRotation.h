@@ -25,7 +25,7 @@ class XorKeyRotation : public BasicSecurityLayer {
   std::uniform_int_distribution<> keyGen;
 
   WirelessFrame frame;
-  uint64_t prevKey = 0;
-  uint64_t newKey = 0;
-  uint64_t tempNewKey = 0;
+  uint64_t prevKey = 1;
+  uint64_t newKey = 1;
+  uint64_t tempNewKey = 1;
 };

@@ -65,6 +65,7 @@ class App {
   static uint64_t getTimeBaseMs();
 
   static HC12Module& getRadioModule() { return radioModule; }
+  static WirelessController& getWirelessController() { return wirelessController; }
   static Motor& getMotorInstance() { return motor; }
 
   static void performSteeringData(const SteeringData& steeringData);

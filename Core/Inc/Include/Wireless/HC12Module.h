@@ -16,6 +16,8 @@ class HC12Module {
   void sendRawData(void* data, size_t size);
   const WirelessFrame& getReceivedFrame(uint8_t* frameLength = nullptr);
 
+  void enableEncryptionProcessing() { this->isEncryptionProcessingEnabled = true; }
+  void disableEncryptionProcessing() { this->isEncryptionProcessingEnabled = false; }
   void setByteUsedAsReceivedAck(uint8_t ack) { this->ackByte = ack; }
 
   bool isFrameAvailable();
@@ -45,6 +47,7 @@ class HC12Module {
   bool isFrameReceiving;
   bool isTxCplt;
   bool isAckReceived = false;
+  bool isEncryptionProcessingEnabled = false;
   uint8_t ackByte;
 
   etl::delegate<uint64_t()> timeBaseUs;

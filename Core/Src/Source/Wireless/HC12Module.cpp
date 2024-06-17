@@ -65,16 +65,30 @@ void HC12Module::loadDataToFrameStruct() {
   this->receivedFrame.command = this->receiverContext.rxFrame[frameIdx++];
   this->receivedFrame.dataSize = this->receiverContext.rxFrame[frameIdx++];
 
+  uint8_t tempDataSize = 0;
+  if (this->isEncryptionProcessingEnabled) {
+    if (this->receiverContext.rxFrameSize < MIN_FRAME_SIZE + FRAME_KEY_SIZE) {
+      return;
+    }
+    tempDataSize = this->receiverContext.rxFrameSize - MIN_FRAME_SIZE - FRAME_KEY_SIZE;
+  } else {
+    tempDataSize = this->receiverContext.rxFrameSize - MIN_FRAME_SIZE;
+  }
+
   memcpy(this->receivedFrame.data, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
-         this->receiverContext.rxFrameSize - MIN_FRAME_SIZE);
-  frameIdx += this->receiverContext.rxFrameSize - MIN_FRAME_SIZE;
+         tempDataSize);
+  frameIdx += tempDataSize;
 
   memcpy(&this->receivedFrame.crc16, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
          sizeof(this->receivedFrame.crc16));
   frameIdx += sizeof(this->receivedFrame.crc16);
 
-  memcpy(&this->receivedFrame.key, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
-         sizeof(this->receivedFrame.key));
+  if (this->isEncryptionProcessingEnabled) {
+    memcpy(&this->receivedFrame.key, (uint8_t*)&this->receiverContext.rxFrame[frameIdx],
+           sizeof(this->receivedFrame.key));
+  } else {
+    this->receivedFrame.key = 0;
+  }
 
   this->receivedFrameLength = this->receiverContext.rxFrameSize;
   this->receiverContext.isRxCompleted = true;
@@ -87,12 +101,9 @@ void HC12Module::onReceivedData(void) {
   this->timeStampLastByte = this->timeBaseUs();
   this->isFrameReceiving = true;
 
-  if (this->receiverContext.rxByte == this->ackByte && this->receiverContext.rxFrameSize == 0) {
-    this->isAckReceived = true;
-  } else {
-    this->receiverContext.rxFrame[this->receiverContext.rxFrameSize] = this->receiverContext.rxByte;
-    this->receiverContext.rxFrameSize++;
-  }
+  this->receiverContext.rxFrame[this->receiverContext.rxFrameSize] = this->receiverContext.rxByte;
+  this->receiverContext.rxFrameSize++;
+
   HAL_UART_Receive_IT(this->huart, (uint8_t*)&receiverContext.rxByte, 1);
 }
 
@@ -101,7 +112,10 @@ void HC12Module::enableNormalMode() { this->setPin->set(); }
 void HC12Module::enableCommandMode() { this->setPin->reset(); }
 
 void HC12Module::processFrame() {
-  if (this->receiverContext.rxFrameSize >= MIN_FRAME_SIZE) {
+  if (this->receiverContext.rxFrameSize == 1 && this->receiverContext.rxFrame[0] == this->ackByte) {
+    this->receiverContext.rxFrame[0] = 0;
+    this->isAckReceived = true;
+  } else if (this->receiverContext.rxFrameSize >= MIN_FRAME_SIZE) {
     this->loadDataToFrameStruct();
   }
   this->receiverContext.rxFrameSize = 0;

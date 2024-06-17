@@ -33,9 +33,9 @@ void XorKeyRotation::decrypt(uint8_t* data, size_t size) {
   if (!data) {
     return;
   }
+  this->xorWithKey(data, size, this->newKey);
   memcpy(&this->tempNewKey, (void*)(data + (size - sizeof(this->tempNewKey))),
          sizeof(this->tempNewKey));
-  this->xorWithKey(data, size, this->newKey);
 }
 
 void XorKeyRotation::decryptUsingPreviousKey(uint8_t* data, size_t size) {
