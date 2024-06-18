@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#include "../Utils/Timer.h"
+#include "AppHelper/Utils/Timer.h"
 #include "GPIOPortPin.h"
 
 class Timer;
@@ -24,6 +24,7 @@ class Led {
   Timer timer;
 
   uint32_t ledBlinkDurationMs;
+  bool isBlinkEnabled = false;
   uint16_t ledOnMs;
   uint16_t ledOffMs;
 };

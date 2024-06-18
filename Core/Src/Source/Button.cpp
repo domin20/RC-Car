@@ -4,9 +4,7 @@
 #define IS_RELEASED 1
 
 Button::Button(etl::delegate<uint64_t()> timeBase)
-    : onClick(), timeBase(timeBase), state(State::IDLE) {
-  this->buttonReadTimer.setUpFor(20);
-}
+    : onClick(), timeBase(timeBase), state(State::IDLE) {}
 
 void Button::update() {
   if (this->isBlocked) {

@@ -5,64 +5,70 @@
 void Led::setPin(GPIOPortPin* portPin) { pin = portPin; }
 
 void Led::update() {
-  timer.update();
-  if (timer.isElapsed() && ledBlinkDurationMs) {
-    if (isLedOn) {
-      ledOff();
-      if (ledOffMs > ledBlinkDurationMs) {
-        timer.setUpFor(ledBlinkDurationMs);
-        ledBlinkDurationMs = 0;
+  this->timer.update();
+  if (!this->isBlinkEnabled) {
+    return;
+  }
+  if (this->timer.isElapsed() && this->ledBlinkDurationMs) {
+    if (this->isLedOn) {
+      this->ledOff();
+      if (this->ledOffMs > this->ledBlinkDurationMs) {
+        this->timer.setUpFor(this->ledBlinkDurationMs);
+        this->ledBlinkDurationMs = 0;
       } else {
-        timer.setUpFor(ledOffMs);
-        ledBlinkDurationMs -= ledOffMs;
+        this->timer.setUpFor(this->ledOffMs);
+        this->ledBlinkDurationMs -= this->ledOffMs;
       }
     } else {
-      ledOn();
-      if (ledOnMs > ledBlinkDurationMs) {
-        timer.setUpFor(ledBlinkDurationMs);
-        ledBlinkDurationMs = 0;
+      this->ledOn();
+      if (this->ledOnMs > this->ledBlinkDurationMs) {
+        this->timer.setUpFor(this->ledBlinkDurationMs);
+        this->ledBlinkDurationMs = 0;
       } else {
-        timer.setUpFor(ledOnMs);
-        ledBlinkDurationMs -= ledOnMs;
+        this->timer.setUpFor(this->ledOnMs);
+        this->ledBlinkDurationMs -= this->ledOnMs;
       }
     }
-  } else if (timer.isElapsed() && !ledBlinkDurationMs && isLedOn) {
-    ledOff();
+  } else if (this->timer.isElapsed() && !this->ledBlinkDurationMs) {
+    this->ledOff();
+    this->isBlinkEnabled = false;
   }
 }
 
 void Led::ledOn() {
-  if (pin != nullptr) {
-    HAL_GPIO_WritePin(pin->port, pin->pin, GPIO_PIN_RESET);
-    isLedOn = true;
+  if (this->pin != nullptr) {
+    HAL_GPIO_WritePin(pin->port, pin->pin, GPIO_PIN_SET);
+    this->isLedOn = true;
   }
 }
 
 void Led::ledOff() {
-  if (pin != nullptr) {
-    HAL_GPIO_WritePin(pin->port, pin->pin, GPIO_PIN_SET);
-    isLedOn = false;
+  if (this->pin != nullptr) {
+    HAL_GPIO_WritePin(pin->port, pin->pin, GPIO_PIN_RESET);
+    this->isLedOn = false;
   }
 }
 
 void Led::ledToggle() {
-  if (pin != nullptr) {
+  if (this->pin != nullptr) {
     HAL_GPIO_TogglePin(pin->port, pin->pin);
-    isLedOn = !isLedOn;
+    this->isLedOn = !isLedOn;
   }
 }
 
 void Led::setBlink(uint16_t timeOnMs, uint16_t timeOffMs, uint32_t durationMs) {
-  stopBlink();
-  ledOnMs = timeOnMs;
-  ledOffMs = timeOffMs;
-  ledBlinkDurationMs = durationMs;
+  this->stopBlink();
+  this->isBlinkEnabled = true;
+  this->ledOnMs = timeOnMs;
+  this->ledOffMs = timeOffMs;
+  this->ledBlinkDurationMs = durationMs;
 }
 
 void Led::stopBlink() {
-  ledOnMs = 0;
-  ledOffMs = 0;
-  ledBlinkDurationMs = 0;
-  timer.stop();
-  ledOff();
+  this->ledOnMs = 0;
+  this->ledOffMs = 0;
+  this->ledBlinkDurationMs = 0;
+  this->isBlinkEnabled = false;
+  this->timer.stop();
+  this->ledOff();
 }

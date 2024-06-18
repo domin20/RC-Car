@@ -1,3 +1,4 @@
+#include "AdcManager.h"
 #include "App.h"
 #include "usart.h"
 
@@ -7,6 +8,8 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) { App::getRadioModule().
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   if (htim->Instance == TIM2) {
-    App::updateTimeBaseUs();
+    App::updateTimeBaseUs10();
   }
 }
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) { AdcManager::endOfConversionCallback(); }

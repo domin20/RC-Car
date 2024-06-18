@@ -20,17 +20,18 @@ void LedRGB::selfTest() {
   green.ledOff();
   blue.ledOff();
   red.ledOn();
-  HAL_Delay(500);
+  HAL_Delay(200);
   red.ledOff();
   green.ledOn();
-  HAL_Delay(500);
+  HAL_Delay(200);
   green.ledOff();
   blue.ledOn();
-  HAL_Delay(500);
+  HAL_Delay(200);
   blue.ledOff();
 }
 
 void LedRGB::ledOn(LedColor color) {
+  turnOffAllColors();
   if (color == LedColor::RED) red.ledOn();
   if (color == LedColor::GREEN) green.ledOn();
   if (color == LedColor::BLUE) blue.ledOn();
@@ -61,6 +62,12 @@ void LedRGB::ledToggle(LedColor color) {
     green.ledToggle();
     blue.ledToggle();
   }
+}
+
+void LedRGB::turnOffAllColors() {
+  red.ledOff();
+  green.ledOff();
+  blue.ledOff();
 }
 
 void LedRGB::setBlink(LedColor color, uint16_t timeOnMs, uint16_t timeOffMs, uint32_t durationMs) {
