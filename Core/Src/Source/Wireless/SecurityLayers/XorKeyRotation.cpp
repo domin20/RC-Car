@@ -29,20 +29,22 @@ void XorKeyRotation::encryptUsingSameKey(uint8_t* data, size_t size) {
   this->xorWithKey(data, size, this->prevKey);
 }
 
-void XorKeyRotation::decrypt(uint8_t* data, size_t size) {
+bool XorKeyRotation::decrypt(uint8_t* data, size_t size) {
   if (!data) {
-    return;
+    return false;
   }
   this->xorWithKey(data, size, this->newKey);
   memcpy(&this->tempNewKey, (void*)(data + (size - sizeof(this->tempNewKey))),
          sizeof(this->tempNewKey));
+  return true;
 }
 
-void XorKeyRotation::decryptUsingPreviousKey(uint8_t* data, size_t size) {
+bool XorKeyRotation::decryptUsingPreviousKey(uint8_t* data, size_t size) {
   if (!data) {
-    return;
+    return false;
   }
   this->xorWithKey(data, size, this->prevKey);
+  return true;
 }
 
 void XorKeyRotation::xorWithKey(uint8_t* data, size_t size, uint64_t key) {

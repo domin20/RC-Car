@@ -19,13 +19,13 @@ class WirelessController {
   const WirelessFrame& getReceivedFrame(uint8_t* frameLength = nullptr);
 
  private:
-  void send(uint8_t command, uint8_t dataSize, void* data);
+  void send(uint8_t command, void* data, uint8_t dataSize);
   void sendEncryptedFrame(uint8_t frameSize);
   void sendEncryptedFrameUsingSameKey(uint8_t frameSize);
   void sendAck();
 
-  void processEncryptedFrame(const WirelessFrame& frame, uint8_t frameLength);
-  void processEncryptedFrameUsingPreviousKey(const WirelessFrame& frame, uint8_t frameLength);
+  bool processEncryptedFrame(const WirelessFrame& frame, uint8_t frameLength);
+  bool processEncryptedFrameUsingPreviousKey(const WirelessFrame& frame, uint8_t frameLength);
 
   void securityLayerUpdate();
   bool isAckWaitingTimePassed();

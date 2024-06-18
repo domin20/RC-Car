@@ -7,6 +7,7 @@
 #include "../Structures.h"
 
 struct SecurityLayerContext {
+  bool isAckEnabled = true;
   bool isAckReceived = true;
   time_t lastTxFrameTimestamp = 0;
 };
@@ -25,8 +26,8 @@ class BasicSecurityLayer {
   virtual void encrypt(uint8_t* data, size_t size) = 0;
   virtual void encryptUsingSameKey(uint8_t* data, size_t size) = 0;
 
-  virtual void decrypt(uint8_t* data, size_t size) = 0;
-  virtual void decryptUsingPreviousKey(uint8_t* data, size_t size) = 0;
+  virtual bool decrypt(uint8_t* data, size_t size) = 0;
+  virtual bool decryptUsingPreviousKey(uint8_t* data, size_t size) = 0;
 
  protected:
   static std::mt19937 generator;

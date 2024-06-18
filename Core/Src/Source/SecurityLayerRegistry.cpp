@@ -14,5 +14,6 @@ void SecurityLayerRegistry::init() {
   layers[SecurityLayerType::XOR_KEY_ROTATION] =
       std::make_pair(xorKeyRotationContext, &xorKeyRotationLayer);
 
+  timestampContext.isAckEnabled = false;
   layers[SecurityLayerType::TIMESTAMP] = std::make_pair(timestampContext, &timestampLayer);
 }

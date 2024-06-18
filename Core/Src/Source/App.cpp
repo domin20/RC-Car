@@ -47,6 +47,7 @@ void App::setup() {
   AppEnvironment::setAppEnvironmentContext(&appContext);
   SecurityLayerRegistry::init();
 
+  App::initRTC();
   App::initTimers();
   App::initButtons();
   App::initMotorContext();
@@ -95,6 +96,8 @@ void App::updateTimeBaseUs10() {
   timeBaseUs10++;
   if (timeBaseUs10 % 100 == 0) timeBaseMs++;
 }
+
+void App::initRTC() { App::synchronizeRtcDateTime(1718746700); }
 
 void App::initTimers() {
   HAL_TIM_Base_Start_IT(&htim2);

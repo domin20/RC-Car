@@ -9,7 +9,7 @@ void WirelessController::init(HC12Module* module) {
   this->radioModule->setByteUsedAsReceivedAck(this->ackByte);
 }
 
-void WirelessController::send(uint8_t command, uint8_t dataSize, void* data) {
+void WirelessController::send(uint8_t command, void* data, uint8_t dataSize) {
   this->txFrame.master = MASTER_NUMBER;
   this->txFrame.command = command;
   this->txFrame.dataSize = dataSize;
@@ -58,19 +58,19 @@ void WirelessController::sendEncryptedFrameUsingSameKey(uint8_t frameSize) {
 
 void WirelessController::sendAck() { this->radioModule->sendRawData(&this->ackByte, 1); }
 
-void WirelessController::processEncryptedFrame(const WirelessFrame& frame, uint8_t frameLength) {
+bool WirelessController::processEncryptedFrame(const WirelessFrame& frame, uint8_t frameLength) {
   assert(this->securityLayerPair != nullptr);
   assert(frameLength >= MIN_FRAME_SIZE);
 
   frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
-  this->securityLayerPair->second->decrypt(this->rxFrameBuffer, frameLength);
+  return this->securityLayerPair->second->decrypt(this->rxFrameBuffer, frameLength);
 }
 
-void WirelessController::processEncryptedFrameUsingPreviousKey(const WirelessFrame& frame,
+bool WirelessController::processEncryptedFrameUsingPreviousKey(const WirelessFrame& frame,
                                                                uint8_t frameLength) {
   assert(this->securityLayerPair != nullptr);
   frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
-  this->securityLayerPair->second->decryptUsingPreviousKey(this->rxFrameBuffer, frameLength);
+  return this->securityLayerPair->second->decryptUsingPreviousKey(this->rxFrameBuffer, frameLength);
 }
 
 void WirelessController::securityLayerUpdate() {
@@ -98,7 +98,7 @@ void WirelessController::onAckReceived() {
 }
 
 void WirelessController::onService() {
-  if (this->radioModule->isAckAvailable()) {
+  if (this->radioModule->isAckAvailable() || !this->securityLayerPair->first.isAckEnabled) {
     this->onAckReceived();
   }
   if (this->isFrameAvailable()) {
@@ -107,34 +107,35 @@ void WirelessController::onService() {
     assert(this->securityLayerPair != nullptr);
 
     if (this->securityLayerPair->second) {
-      this->processEncryptedFrame(receivedFrame, frameLength);
+      auto result = this->processEncryptedFrame(receivedFrame, frameLength);
 
-      static uint8_t validFrameCnt = 0;
-      static uint8_t notValidFrameCnt = 0;
-      static uint8_t validFrameUsingPrevKey = 0;
-      uint8_t x = 0;
+      // static uint8_t validFrameCnt = 0;
+      // static uint8_t notValidFrameCnt = 0;
+      // static uint8_t validFrameUsingPrevKey = 0;
+      // uint8_t x = 0;
 
       WirelessFrame processedFrame;
       processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
 
-      if (validFrameCnt == 44) {
-        x += 1;
-      }
-      if (!this->checkFrameCRC16(processedFrame, frameLength, true)) {  // if crc16 is not valid
+      // if (validFrameCnt == 44) {
+      //   x += 1;
+      // }
 
+      // if crc16 is valid
+      if (this->checkFrameCRC16(processedFrame, frameLength, true) && result) {
+        this->onCommandService(processedFrame);
+        this->securityLayerPair->second->updateKeys();
+        if (this->securityLayerPair->first.isAckEnabled) {
+          this->sendAck();
+        }
+      } else {
         this->processEncryptedFrameUsingPreviousKey(receivedFrame, frameLength);
         processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
         if (this->checkFrameCRC16(processedFrame, frameLength, true)) {
-          validFrameUsingPrevKey++;
-          this->sendAck();
-        } else {
-          notValidFrameCnt++;
+          if (this->securityLayerPair->first.isAckEnabled) {
+            this->sendAck();
+          }
         }
-      } else {
-        validFrameCnt++;
-        this->onCommandService(processedFrame);
-        this->securityLayerPair->second->updateKeys();
-        this->sendAck();
       }
       return;
     }
@@ -160,12 +161,15 @@ void WirelessController::onCommandService(const WirelessFrame& rxFrame) {
 }
 
 void WirelessController::sendSynchronizeRTCResponse() {
+  static bool wasSynchronizedAtStart = false;
   static uint64_t lastSynchronizeRequestTs = 0;
-  if (AppEnvironment::getEnvironmentContext()->timeBaseMs() - lastSynchronizeRequestTs > 3000) {
+  if (AppEnvironment::getEnvironmentContext()->timeBaseMs() - lastSynchronizeRequestTs > 3000 ||
+      !wasSynchronizedAtStart) {
+    wasSynchronizedAtStart = true;
     lastSynchronizeRequestTs = AppEnvironment::getEnvironmentContext()->timeBaseMs();
     time_t time = AppEnvironment::getEnvironmentContext()->getUnixTimeFromRTC();
 
-    this->send(WirelessCommand::SYNCHRONIZE_RTC, sizeof(time), &time);
+    this->send(WirelessCommand::SYNCHRONIZE_RTC, &time, sizeof(time));
   }
 }
 
