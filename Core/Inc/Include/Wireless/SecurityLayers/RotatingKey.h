@@ -3,9 +3,9 @@
 
 #include "BasicSecurityLayer.h"
 
-class XorKeyRotation : public BasicSecurityLayer {
+class RotatingKey : public BasicSecurityLayer {
  public:
-  XorKeyRotation() : keyGen() {}
+  RotatingKey() : keyGen() {}
 
   bool isValid(uint64_t key) override;
   uint64_t generateNewKey() override;

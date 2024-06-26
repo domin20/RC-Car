@@ -102,17 +102,19 @@ void WirelessController::onService() {
     this->onAckReceived();
   }
   if (this->isFrameAvailable()) {
+    static uint16_t validFrameCnt = 0;
+    static uint16_t validEncryptedFrameCnt = 0;
+    static uint16_t notValidFrameCnt = 0;
+    static uint16_t notValidEncryptedFrameCnt = 0;
+    static uint16_t validFrameUsingPrevKey = 0;
+    // uint8_t x = 0;
+
     uint8_t frameLength = 0;
     auto& receivedFrame = this->getReceivedFrame(&frameLength);
     assert(this->securityLayerPair != nullptr);
 
     if (this->securityLayerPair->second) {
       auto result = this->processEncryptedFrame(receivedFrame, frameLength);
-
-      // static uint8_t validFrameCnt = 0;
-      // static uint8_t notValidFrameCnt = 0;
-      // static uint8_t validFrameUsingPrevKey = 0;
-      // uint8_t x = 0;
 
       WirelessFrame processedFrame;
       processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
@@ -123,6 +125,7 @@ void WirelessController::onService() {
 
       // if crc16 is valid
       if (this->checkFrameCRC16(processedFrame, frameLength, true) && result) {
+        validEncryptedFrameCnt++;
         this->onCommandService(processedFrame);
         this->securityLayerPair->second->updateKeys();
         if (this->securityLayerPair->first.isAckEnabled) {
@@ -132,17 +135,22 @@ void WirelessController::onService() {
         this->processEncryptedFrameUsingPreviousKey(receivedFrame, frameLength);
         processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
         if (this->checkFrameCRC16(processedFrame, frameLength, true)) {
+          validFrameUsingPrevKey++;
           if (this->securityLayerPair->first.isAckEnabled) {
             this->sendAck();
           }
+        } else {
+          notValidEncryptedFrameCnt++;
         }
       }
       return;
     }
     if (!this->checkFrameCRC16(receivedFrame, frameLength, false)) {
+      notValidFrameCnt++;
       return;
     }
     this->onCommandService(receivedFrame);
+    validFrameCnt++;
   }
 }
 
@@ -155,6 +163,17 @@ void WirelessController::onCommandService(const WirelessFrame& rxFrame) {
       } else {
         memcpy(&steeringData, rxFrame.data, rxFrame.dataSize);
         App::performSteeringData(steeringData);
+      }
+      break;
+
+    case WirelessCommand::SYNCHRONIZE_RTC:
+      time_t currentTime = 0;
+      if (rxFrame.dataSize != sizeof(time_t)) {
+        return;
+      } else {
+        memcpy(&currentTime, rxFrame.data, rxFrame.dataSize);
+        App::synchronizeRtcDateTime(currentTime);
+        this->sendAck();
       }
       break;
   }

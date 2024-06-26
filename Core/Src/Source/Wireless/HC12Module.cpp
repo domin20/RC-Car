@@ -4,9 +4,9 @@
 #include <string.h>
 
 void HC12Module::init(UART_HandleTypeDef* huart, GPIOPortPin* setPin,
-                      etl::delegate<uint64_t()> timeBaseUs) {
+                      etl::delegate<uint64_t()> timeBaseUs10) {
   this->huart = huart;
-  this->timeBaseUs = timeBaseUs;
+  this->timeBaseUs10 = timeBaseUs10;
   this->setPin = setPin;
   this->enableNormalMode();
 
@@ -46,11 +46,11 @@ bool HC12Module::isAckAvailable() {
 }
 
 void HC12Module::update() {
-  if (!this->timeBaseUs) {
+  if (!this->timeBaseUs10) {
     return;
   }
   if (this->isFrameReceiving) {
-    if (this->timeBaseUs() - this->timeStampLastByte > _3_5_CHAR_SEND_TIME_US) {
+    if (this->timeBaseUs10() - this->timeStampLastByte > _5_CHAR_SEND_TIME_US10) {
       this->processFrame();
     }
   }
@@ -95,10 +95,10 @@ void HC12Module::loadDataToFrameStruct() {
 }
 
 void HC12Module::onReceivedData(void) {
-  if (!this->timeBaseUs) {
+  if (!this->timeBaseUs10) {
     return;
   }
-  this->timeStampLastByte = this->timeBaseUs();
+  this->timeStampLastByte = this->timeBaseUs10();
   this->isFrameReceiving = true;
 
   this->receiverContext.rxFrame[this->receiverContext.rxFrameSize] = this->receiverContext.rxByte;

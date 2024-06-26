@@ -146,7 +146,7 @@ void App::synchronizeRtcDateTime(time_t time) {
   rtcTime.Minutes = timeStruct.tm_min;
   rtcTime.Hours = timeStruct.tm_hour;
 
-  rtcDate.Year = timeStruct.tm_year;
+  rtcDate.Year = timeStruct.tm_year - 100;
   rtcDate.Month = timeStruct.tm_mon + 1;
   rtcDate.Date = timeStruct.tm_mday;
 
@@ -204,13 +204,13 @@ void App::enableMotorTest() {
 void App::switchSecurityLayerType() {
   switch (securityLayerType) {
     case SecurityLayerType::NONE:
-      securityLayerType = SecurityLayerType::XOR_KEY_ROTATION;
+      securityLayerType = SecurityLayerType::ROTATING_KEY;
       App::getWirelessController().setSecurityLayer(
-          SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::XOR_KEY_ROTATION));
+          SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::ROTATING_KEY));
       radioModule.enableEncryptionProcessing();
       LedRGB::ledOn(LedColor::GREEN);
       break;
-    case SecurityLayerType::XOR_KEY_ROTATION:
+    case SecurityLayerType::ROTATING_KEY:
       securityLayerType = SecurityLayerType::TIMESTAMP;
       App::getWirelessController().setSecurityLayer(
           SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::TIMESTAMP));
