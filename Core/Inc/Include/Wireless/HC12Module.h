@@ -10,7 +10,7 @@
 
 class HC12Module {
  public:
-  void init(UART_HandleTypeDef* huart, GPIOPortPin* setPin, etl::delegate<uint64_t()> timeBaseUs);
+  void init(UART_HandleTypeDef* huart, GPIOPortPin* setPin, etl::delegate<uint64_t()> timeBaseUs10);
 
   bool sendFrame(uint8_t* frame, uint8_t size);
   void sendRawData(void* data, size_t size);
@@ -50,5 +50,5 @@ class HC12Module {
   bool isEncryptionProcessingEnabled = false;
   uint8_t ackByte;
 
-  etl::delegate<uint64_t()> timeBaseUs;
+  etl::delegate<uint64_t()> timeBaseUs10;
 };

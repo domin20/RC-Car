@@ -11,6 +11,9 @@ class Timestamp : public BasicSecurityLayer {
   void encrypt(uint8_t* data, size_t size) override;
   void encryptUsingSameKey(uint8_t* data, size_t size) override;
 
-  void decrypt(uint8_t* data, size_t size) override;
-  void decryptUsingPreviousKey(uint8_t* data, size_t size) override;
+  bool decrypt(uint8_t* data, size_t size) override;
+  bool decryptUsingPreviousKey(uint8_t* data, size_t size) override;
+
+ private:
+  uint64_t processTimestampUsingXor(uint64_t timestamp, uint8_t* data, uint8_t size);
 };

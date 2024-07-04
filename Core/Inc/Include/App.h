@@ -31,6 +31,7 @@ class App {
   static void assertFailed();
 
   // init methods
+  static void initRTC();
   static void initTimers();
   static void initButtons();
   static void initMotorContext();

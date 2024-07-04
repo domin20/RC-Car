@@ -3,9 +3,9 @@
 
 #include "BasicSecurityLayer.h"
 
-class XorKeyRotation : public BasicSecurityLayer {
+class RotatingKey : public BasicSecurityLayer {
  public:
-  XorKeyRotation() : keyGen() {}
+  RotatingKey() : keyGen() {}
 
   bool isValid(uint64_t key) override;
   uint64_t generateNewKey() override;
@@ -15,8 +15,8 @@ class XorKeyRotation : public BasicSecurityLayer {
   void encrypt(uint8_t* data, size_t size) override;
   void encryptUsingSameKey(uint8_t* data, size_t size);
 
-  void decrypt(uint8_t* data, size_t size) override;
-  void decryptUsingPreviousKey(uint8_t* data, size_t size) override;
+  bool decrypt(uint8_t* data, size_t size) override;
+  bool decryptUsingPreviousKey(uint8_t* data, size_t size) override;
 
  private:
   void xorWithKey(uint8_t* data, size_t size, uint64_t key);
