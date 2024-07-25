@@ -7,6 +7,7 @@
 #include "../Structures.h"
 
 struct SecurityLayerContext {
+  bool isKeyUsed = true;
   bool isAckEnabled = true;
   bool isAckReceived = true;
   time_t lastTxFrameTimestamp = 0;

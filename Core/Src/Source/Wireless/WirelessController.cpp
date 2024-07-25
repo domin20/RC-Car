@@ -17,16 +17,20 @@ void WirelessController::send(uint8_t command, void* data, uint8_t dataSize) {
 
   this->txFrame.crc16 =
       calculateCRC16(reinterpret_cast<uint8_t*>(&this->txFrame), txFrame.dataSize + 3);
-  uint8_t frameSize = this->txFrame.ToBuffer(this->txFrameBuffer, 50);
+  uint8_t frameSize = this->txFrame.ToBuffer(this->txFrameBuffer, txFrame.dataSize + 5);
 
   assert(this->securityLayerPair != nullptr);
   if (this->securityLayerPair->second) {
-    frameSize += sizeof(uint64_t);
-    if (this->securityLayerPair->first.isAckReceived) {
+    if (this->securityLayerPair->first.isKeyUsed) {
+      frameSize += sizeof(uint64_t);
+      if (this->securityLayerPair->first.isAckReceived) {
+        this->sendEncryptedFrame(frameSize);
+      } else if (this->securityLayerPair->first.isAckReceived == false &&
+                 this->isAckWaitingTimePassed()) {
+        this->sendEncryptedFrameUsingSameKey(frameSize);
+      }
+    } else {
       this->sendEncryptedFrame(frameSize);
-    } else if (this->securityLayerPair->first.isAckReceived == false &&
-               this->isAckWaitingTimePassed()) {
-      this->sendEncryptedFrameUsingSameKey(frameSize);
     }
     return;
   }
@@ -62,14 +66,22 @@ bool WirelessController::processEncryptedFrame(const WirelessFrame& frame, uint8
   assert(this->securityLayerPair != nullptr);
   assert(frameLength >= MIN_FRAME_SIZE);
 
-  frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
+  if (frame.key == 0) {
+    frame.ToBuffer(this->rxFrameBuffer, frameLength);
+  } else {
+    frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
+  }
   return this->securityLayerPair->second->decrypt(this->rxFrameBuffer, frameLength);
 }
 
 bool WirelessController::processEncryptedFrameUsingPreviousKey(const WirelessFrame& frame,
                                                                uint8_t frameLength) {
   assert(this->securityLayerPair != nullptr);
-  frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
+  if (frame.key == 0) {
+    frame.ToBuffer(this->rxFrameBuffer, frameLength);
+  } else {
+    frame.ToBufferIfEncrypted(this->rxFrameBuffer, frameLength);
+  }
   return this->securityLayerPair->second->decryptUsingPreviousKey(this->rxFrameBuffer, frameLength);
 }
 
@@ -119,12 +131,10 @@ void WirelessController::onService() {
       WirelessFrame processedFrame;
       processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
 
-      // if (validFrameCnt == 44) {
-      //   x += 1;
-      // }
-
       // if crc16 is valid
-      if (this->checkFrameCRC16(processedFrame, frameLength, true) && result) {
+      if (this->checkFrameCRC16(processedFrame, frameLength,
+                                this->securityLayerPair->first.isKeyUsed) &&
+          result) {
         validEncryptedFrameCnt++;
         this->onCommandService(processedFrame);
         this->securityLayerPair->second->updateKeys();
@@ -134,7 +144,11 @@ void WirelessController::onService() {
       } else {
         this->processEncryptedFrameUsingPreviousKey(receivedFrame, frameLength);
         processedFrame.ToFrame(this->rxFrameBuffer, frameLength);
-        if (this->checkFrameCRC16(processedFrame, frameLength, true)) {
+        if (this->checkFrameCRC16(processedFrame, frameLength,
+                                  this->securityLayerPair->first.isKeyUsed)) {
+          if (!this->securityLayerPair->first.isKeyUsed) {
+            this->onCommandService(processedFrame);
+          }
           validFrameUsingPrevKey++;
           if (this->securityLayerPair->first.isAckEnabled) {
             this->sendAck();
@@ -201,7 +215,7 @@ bool WirelessController::checkFrameCRC16(const WirelessFrame& frame, uint8_t fra
   if (isEncrypted) {
     frameSize = frame.ToBufferIfEncrypted(buffer, frameLength);
   } else {
-    frameSize = frame.ToBuffer(buffer, MAX_FRAME_SIZE);
+    frameSize = frame.ToBuffer(buffer, frameLength);
   }
   if (!frameSize) {
     return false;
