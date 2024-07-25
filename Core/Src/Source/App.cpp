@@ -214,7 +214,7 @@ void App::switchSecurityLayerType() {
       securityLayerType = SecurityLayerType::TIMESTAMP;
       App::getWirelessController().setSecurityLayer(
           SecurityLayerRegistry::getSecurityLayer(SecurityLayerType::TIMESTAMP));
-      radioModule.enableEncryptionProcessing();
+      radioModule.disableEncryptionProcessing();
       LedRGB::ledOn(LedColor::BLUE);
       break;
     case SecurityLayerType::TIMESTAMP:

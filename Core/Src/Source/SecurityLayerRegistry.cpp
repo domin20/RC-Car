@@ -10,9 +10,11 @@ RotatingKey SecurityLayerRegistry::rotatingKeyLayer;
 Timestamp SecurityLayerRegistry::timestampLayer;
 
 void SecurityLayerRegistry::init() {
+  defaultContext.isKeyUsed = false;
   layers[SecurityLayerType::NONE] = std::make_pair(defaultContext, nullptr);
   layers[SecurityLayerType::ROTATING_KEY] = std::make_pair(rotatingKeyContext, &rotatingKeyLayer);
 
+  timestampContext.isKeyUsed = false;
   timestampContext.isAckEnabled = false;
   layers[SecurityLayerType::TIMESTAMP] = std::make_pair(timestampContext, &timestampLayer);
 }
